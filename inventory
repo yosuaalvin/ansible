@@ -1,4 +1,4 @@
-serverd.lab.example.com
+servere.lab.example.com
 
 [development]
 servera.lab.example.com
@@ -6,7 +6,7 @@ serverb.lab.example.com
 
 [production]
 serverc.lab.example.com
-servere.lab.example.com
+serverd.lab.example.com
 
 [jakarta]
 servera.lab.example.com

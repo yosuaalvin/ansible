@@ -1,0 +1,107 @@
+---
+- name: Create multiple local groups
+  hosts: asia,ungrouped
+  become: true
+  tasks:
+   - group:
+      name: "{{ item }}"
+      state: present
+     loop:
+      - unggas
+      - reptil
+      - sate
+- name: Create multiple local users
+  hosts: asia,ungrouped
+  vars_files:
+    - vars/users_vars.yml
+  tasks:
+    - name: Create user accounts
+      user:
+        name: "{{ item.username }}"
+        groups: "{{ item.groups }}"
+      loop: "{{ users }}"
+- name: Install package httpd,sshd,firewalld in host not in asia
+  hosts: all:!asia
+  tasks:
+    - name: Install httpd,sshd,firewalld using yum when supported
+      yum:
+        name:
+          - httpd
+          - openssh-server
+          - firewalld
+        state: latest
+      when: ansible_distribution == 'RedHat'
+- name: Install RPM Development Tools for host contain servera or serverb
+  hosts: ~(servera|serverb).*
+  tasks:
+    - name: Install Development Tools when supported
+      yum:
+        name: "@Development tools"
+        state: present
+        update_cache: yes
+      when: ansible_distribution == 'RedHat'
+- name: Turn off firewall for host contain serverc or serverd
+  hosts: ~(serverc|serverd).*
+  tasks:
+    - name: Stop and disable firewalld
+      service:
+        name: firewalld
+        state: stopped
+        enabled: False
+- name: Install package mariadb in development host
+  hosts: development
+  tasks:
+    - name: Install mariadb where supported
+      yum:
+        name: mariadb
+        state: latest
+      when: ansible_distribution == 'RedHat'
+- name: Install package tmux in production host
+  hosts: production
+  tasks:
+    - name: Install tmux where supported
+      yum:
+        name: tmux
+        state: latest
+      when: ansible_distribution == 'RedHat'
+- name: Turn on httpd, firewalld, sshd in host not in production
+  hosts: all:!production
+  tasks:
+    - name: Install httpd,sshd,firewalld using yum not in production
+      yum:
+        name:
+          - httpd
+          - openssh-server
+          - firewalld
+        state: latest
+      when: ansible_distribution == 'RedHat'
+- name: Start httpd not in production
+  hosts: all:!production
+  tasks:
+    - name: Start httpd not in production    
+      service:
+        name: httpd
+        state: started
+        enabled: True
+- name: Start firewalld not in production
+  hosts: all:!production
+  tasks:
+    - name: Start firewalld not in production   
+      service:
+        name: firewalld
+        state: started
+        enabled: True
+- name: Start sshd not in production
+  hosts: all:!production
+  tasks:
+    - name: Start sshd not in production   
+      service:
+        name: sshd
+        state: started
+        enabled: True
+- name: Using Custom-motd Role
+  hosts: all:!production
+  roles:
+    - custom-motd
+- name: Import playbook
+  import_playbook: time.yml

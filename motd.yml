@@ -1,0 +1,15 @@
+---
+
+- name: use custom motd role playbook
+
+  hosts: all
+
+  remote_user:  student
+
+  become: true
+
+  roles:
+
+    - custom-motd
+
+
